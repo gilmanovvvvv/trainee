@@ -1,4 +1,4 @@
-SinglyLinkedList.h:
+//SinglyLinkedList.h:
 #ifndef SINGLYLINKEDLIST_H
 #define SINGLYLINKEDLIST_H
 
@@ -16,9 +16,9 @@ private:
 public:
     SinglyLinkedList();
     ~SinglyLinkedList();
-    void insert(const T& value);
-    void remove(const T& value);
-    bool search(const T& value);
+    void insert(const T& value, int index);
+    void remove(int index);
+    int search(const T& value);
     void display();
 };
 
@@ -26,8 +26,8 @@ public:
 
 #endif
 
-//SinglyLinkedList.cpp:
 
+//SinglyLinkedList.cpp:
 #include "SinglyLinkedList.h"
 #include <iostream>
 
@@ -44,49 +44,85 @@ SinglyLinkedList<T>::~SinglyLinkedList() {
 }
 
 template <class T>
-void SinglyLinkedList<T>::insert(const T& value) {
-    Node* newNode = new Node(value);
-    if (!head) {
-        head = newNode;
-    } else {
-        Node* temp = head;
-        while (temp->next) {
-            temp = temp->next;
-        }
-        temp->next = newNode;
+void SinglyLinkedList<T>::insert(const T& value, int index) {
+    if (index < 0) {
+        std::cerr << "Invalid index" << std::endl;
+        return;
     }
+
+    Node* newNode = new Node(value);
+    if (index == 0) {
+        newNode->next = head;
+        head = newNode;
+        return;
+    }
+
+    Node* temp = head;
+    int currIndex = 0;
+    while (temp && currIndex < index - 1) {
+        temp = temp->next;
+        currIndex++;
+    }
+
+    if (!temp) {
+        std::cerr << "Invalid index." << std::endl;
+        delete newNode;
+        return;
+    }
+
+    newNode->next = temp->next;
+    temp->next = newNode;
 }
 
 template <class T>
-void SinglyLinkedList<T>::remove(const T& value) {
+void SinglyLinkedList<T>::remove(int index) {
+    if (index < 0) {
+        std::cerr << "Invalid index." << std::endl;
+        return;
+    }
+
+    if (index == 0) {
+        if (head) {
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+        } else {
+            std::cerr << "List is already empty." << std::endl;
+        }
+        return;
+    }
+
     Node* curr = head;
     Node* prev = nullptr;
+    int currIndex = 0;
 
-    while (curr) {
-        if (curr->data == value) {
-            if (prev) {
-                prev->next = curr->next;
-            } else {
-                head = curr->next;
-            }
-            delete curr;
-            return;
-        }
+    while (curr && currIndex < index) {
         prev = curr;
         curr = curr->next;
+        currIndex++;
     }
+
+    if (!curr) {
+        std::cerr << "Invalid index." << std::endl;
+        return;
+    }
+
+    prev->next = curr->next;
+    delete curr;
 }
 
 template <class T>
-bool SinglyLinkedList<T>::search(const T& value) {
+int SinglyLinkedList<T>::search(const T& value) {
     Node* curr = head;
+    int index = 0;
     while (curr) {
         if (curr->data == value) {
-            return true;
+            return index;
         }
         curr = curr->next;
+        index++;
     }
-    return false;
+    return -1; //Если элемент не найден
 }
 
 template <class T>
